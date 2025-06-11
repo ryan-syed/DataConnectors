@@ -2,14 +2,14 @@
 let
     GetResult = (transform) =>
         let
-            Transformed = transform(parameter[taxi_table]),
-            RowCount = Table.RowCount(Transformed)
+            Sort = Table.Sort(parameter[zone_table], {"LocationID"}),
+            Transformed = transform(Sort)
         in
-            RowCount
+            Transformed
 in
     [
-        NoSkipTake = GetResult((table) => table),
         FirstN = GetResult((table) => Table.FirstN(table, 1)),
-        Skip = GetResult((table) => Table.Skip(table, 2199)),
-        FirstNSkip = GetResult((table) => Table.FirstN(Table.Skip(table, 2198), 1))
+        Skip = GetResult((table) => Table.Skip(table, 264)),
+        FirstNSkip = GetResult((table) => Table.FirstN(Table.Skip(table, 200), 1)),
+        NoSkipTake = GetResult((table) => table)
     ]
