@@ -3,7 +3,7 @@ NOTE:
 1) While uploading to the data source, all decimal values should have a scale of 2. That is, the number of digits after the decimal point should be 2. 
 2) All timestamp values should be uploaded to the datasouce in MM/DD/YYYY HH24:MI:SS format.
 */
-CREATE TABLE NycTaxiData(
+CREATE TABLE NycTaxiGreen(
 	RecordID int,
 	VendorID int,
 	lpep_pickup_datetime timestamp,
@@ -26,7 +26,7 @@ CREATE TABLE NycTaxiData(
 	congestion_surcharge double
 );
 
-CREATE TABLE NycTaxiDateData (
+CREATE TABLE NycTaxiGreenDate (
     RecordID int NOT NULL,
 	lpep_pickup_time date NOT NULL,
 	lpep_dropoff_time date NULL
