@@ -1,3 +1,8 @@
+/*
+NOTE: 
+1) While uploading to the data source, all decimal values should have a scale of 2. That is, the number of digits after the decimal point should be 2. 
+2) All timestamp values should be uploaded to the datasouce in MM/DD/YYYY HH24:MI:SS format.
+*/
 CREATE TABLE NycTaxiData(
 	RecordID int,
 	VendorID int,
