@@ -10,7 +10,8 @@ let
     ],
     AddColumns = List.Accumulate(Record.FieldNames(Columns), parameter[taxi_table],
         (state, current) => Table.AddColumn(state, current, Record.Field(Columns, current))),
-    Sorted = Table.Sort(AddColumns,{"total_amount", Order.Descending}),
+    SelectedColumns = Table.SelectColumns(AddColumns, {"RecordID", "lpep_pickup_datetime", "AddDay", "AddHour", "AddMinute", "AddSecond", "AddAll", "Subtract"}),
+    Sorted = Table.Sort(SelectedColumns,{"RecordID", Order.Descending}),
     FirstN = Table.FirstN(Sorted,5)
 in
-    FirstN
+    Table.Buffer(FirstN)

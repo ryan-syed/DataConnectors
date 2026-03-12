@@ -9,8 +9,9 @@ let
         Subtract = each [lpep_pickup_date] - #duration(1,1,1,1.25)
     ],
     AddColumns = List.Accumulate(Record.FieldNames(Columns), parameter[taxi_date_table],
-        (state, current) => Table.AddColumn(state, current, Record.Field(Columns, current))),
-    Sorted = Table.Sort(AddColumns,{"RecordID", Order.Descending}),
+        (state, current) => (Table.AddColumn(state, current, Record.Field(Columns, current)))),
+    SelectedColumns = Table.SelectColumns(AddColumns, {"RecordID", "lpep_pickup_date", "AddDay", "AddHour", "AddMinute", "AddSecond", "AddAll", "Subtract"}),
+    Sorted = Table.Sort(SelectedColumns,{"RecordID", Order.Descending}),
     FirstN = Table.FirstN(Sorted,5)
 in
-    FirstN
+    Table.Buffer(FirstN)
