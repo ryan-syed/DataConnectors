@@ -1,9 +1,11 @@
-/*
-NOTE: 
-1) While uploading to the data source, all decimal values should have a scale of 2. That is, the number of digits after the decimal point should be 2. 
-2) All timestamp values should be uploaded to the datasouce in MM/DD/YYYY HH24:MI:SS format.
-*/
-CREATE TABLE NycTaxiGreen(
+-- Note: Columns defined as 'double' in the taxi data contain values rounded to
+-- two decimal places. Map 'double' to the appropriate floating-point or decimal
+-- type in your data source (e.g., FLOAT, DOUBLE, REAL, DECIMAL(10,2), NUMBER).
+-- Similarly, map 'int' to INTEGER/INT, 'boolean' to BOOLEAN/BIT, 'timestamp' to
+-- DATETIME/TIMESTAMP, 'date' to DATE, and 'string' to VARCHAR/NVARCHAR/TEXT as
+-- supported by your data source.
+
+CREATE TABLE NycTaxiData(
 	RecordID int,
 	VendorID int,
 	lpep_pickup_datetime timestamp,
@@ -19,6 +21,7 @@ CREATE TABLE NycTaxiGreen(
 	mta_tax double,
 	tip_amount double,
 	tolls_amount double,
+	ehail_fee double,
 	improvement_surcharge double,
 	total_amount double,
 	payment_type int,
@@ -26,10 +29,10 @@ CREATE TABLE NycTaxiGreen(
 	congestion_surcharge double
 );
 
-CREATE TABLE NycTaxiGreenDate (
+CREATE TABLE NycTaxiDateData (
     RecordID int NOT NULL,
-	lpep_pickup_time date NOT NULL,
-	lpep_dropoff_time date NULL
+	lpep_pickup_date date NOT NULL,
+	lpep_dropoff_date date NOT NULL
 );
 
 CREATE TABLE TaxiZoneLookup (
