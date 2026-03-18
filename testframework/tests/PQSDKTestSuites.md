@@ -8,11 +8,11 @@ The test framework consists of the following:
 - **Sanity folder**: The sanity tests validate that the tests are able to connect to the data source and the test tables with correct schema exist in the datasource. There are also tests that validate the rowcount and data of NYCTaxiGreen and TaxiZoneLookup tables in the datasource.
 - **Standard folder**: The standard sets contain various tests that need to validate the connector. There are tests to test all the datatypes, Math, Date, Time, Text functions and operators. There are tests to validate joins between two tables as well.
 
-**ConnectorConfigs folder**: This folder contains a folder with the connector name for connector to be tested which contains ParameterQueries & Settings. Samples are provided for a generic connector. 
+**ConnectorConfigs folder**: This folder contains a folder with the connector name for connector to be tested which contains ParameterQueries & Settings. Samples are provided for a generic connector.
   - **ParameterQueries folder:** It will be present under a folder with the connector name and contains the parameter query file(s) which are M queries to connect to the data source and retrieve the NycTaxiGreen & TaxiZoneLookup tables.
   - **Settings folder:** It contains folders with the name of the data source extension connectors where the test folder and the parameter query file locations are specified.
 
-**RunPQSDKTestSuites.ps1:** This script will execute all PQ/PQOut tests present in the Sanity & Standard folders and generate the results.       
+**RunPQSDKTestSuites.ps1:** This script will execute all PQ/PQOut tests present in the Sanity & Standard folders and generate the results.
 
 **RunPQSDKTestSuitesSettings.json:** This json file can be used to provide all the arguments that can be passed to RunPQSDKTestSuites.ps1.
 
@@ -73,7 +73,7 @@ The test data is provided in the form of csv along with the schema defintion. Th
 
 ### Set the credentials for your extension connector:
 
-- Ensure the credentials are setup for your connector following the instructions here: https://learn.microsoft.com/en-us/power-query/power-query-sdk-vs-code#set-credential 
+- Ensure the credentials are setup for your connector following the instructions here: https://learn.microsoft.com/en-us/power-query/power-query-sdk-vs-code#set-credential
 - Alternatively, use this `credential-template` command to generate a credential template in json format for your connector that can be passed into the `set-credential` command.
 
   ```
@@ -192,9 +192,78 @@ Example:
 ## Creating custom tests
 
 Below are sample instructions on how custom tests can be added:
-- Create a `Custom` folder under `testframework\tests\TesSuites`. 
-- Create a PQ file with the M Query that needs to be tested and place it in the `Custom` directory. 
+- Create a `Custom` folder under `testframework\tests\TesSuites`.
+- Create a PQ file with the M Query that needs to be tested and place it in the `Custom` directory.
 - Create a settings file `CustomSettings.json` under `testframework\tests\ConnectorConfigs\<Connector Name>\Settings` folder. Add the paths for test folder `"QueryFilePath": "TestSuites/Custom"` and the parameter query file `"ParameterQueryFilePath": "ParameterQueries/<Connector Name>/<Connector Name>.parameterquery.pq"` in it.
-- Run the test first time to generate the PQOut output file. 
-- Subsequent runs will validate the output generated with the PQOut output file. 
+- Run the test first time to generate the PQOut output file.
+- Subsequent runs will validate the output generated with the PQOut output file.
 - Please review the documentation in [PQTest docs](https://learn.microsoft.com/power-query/sdk-tools/pqtest-overview) for more information on creating new tests using the compare command.
+
+## Known Test Variations Across Connectors
+
+The Standard test suite ships with pre-computed `.pqout` output files that represent expected results for a reference connector. Some tests may produce different results on your connector due to differences in how the underlying data source handles certain operations. These are not bugs in the tests. They reflect genuine behavioral differences across database backends.
+
+When testing your own connector, the recommended approach is to use the shipped `.pqout` baselines. This ensures your connector is validated against the same expected output used across all connectors. If certain tests fail due to genuine differences in how your data source handles specific operations, you can handle those on a case-by-case basis:
+
+1. **Use the shipped baselines (recommended).** Run the tests using the pre-computed `.pqout` files included in this repository. Most tests should pass as-is. If a test fails, investigate whether the failure points to a connector bug that needs to be fixed. You can temporarily exclude failing tests using `TestFilters` in your settings file while you work on a fix. Prefix the test path with `!` to exclude it:
+
+    ```json
+    "TestFilters": [
+        "!Datatypes/Int32FromDateTime.query.pq",
+        "!Math/ValueFunctions_DivideDecimalPrecision.query.pq"
+    ]
+    ```
+
+    Once the fix is in place, remove the filter so the test runs against the shipped baseline again.
+
+2. **Generate your own baselines for specific tests.** If a test fails due to a genuine behavioral difference in your data source (see [Categories of Known Variations](#categories-of-known-variations) below), you can delete the shipped `.pqout` file for that specific test and run it once to generate a new baseline based on your connector's actual output. Only do this for tests where the difference is well understood. Avoid deleting all `.pqout` files at once, as this removes the value of validating against the standard test suite.
+
+### How to Diagnose a Test Failure
+
+When a test fails, compare the actual connector output (`SerializedSource`) against the `.pqout` file (expected output). If the values are structurally correct but differ in precision, offset, or representation, the failure likely falls into one of the categories below.
+
+### Categories of Known Variations
+
+#### 1. Datatype Conversion
+
+The `Datatypes/` folder contains tests that validate type conversion functions like `Int32.From`, `Int64.From`, and `Decimal.From`. These tests verify that the connector correctly folds M type conversions to the equivalent SQL CAST operations. Most of these tests pass across all backends. However, a few conversions rely on M-specific behavior that databases may not replicate:
+
+- **DateTime to integer**: The M engine converts a datetime to a numeric date serial value (days since 1899-12-30). This is specific to Power Query and most databases do not produce the same numeric result when casting a datetime to an integer.
+- **Boolean to integer**: `Int32.From(true)` expects `1`. Some databases do not support casting a boolean directly to an integer.
+- **Rounding modes**: `Int32.From(1.63, null, RoundingMode.Down)` expects `1`. When folded to SQL, the database applies its own CAST or ROUND behavior, which may produce a different result.
+
+**How to spot it:** The test name contains `From` under the `Datatypes/` folder and the actual value differs from the expected value.
+
+**Examples:** `Int32FromDateTime`, `Int32FromLogical`, `Int32FromNumberRoundDown`
+
+#### 2. Floating-Point and Arithmetic Precision
+
+Arithmetic with `Precision.Decimal` or `Precision.Double` can produce values that differ at the last few decimal places. This is due to differences in native type mappings and intermediate computation precision across backends. Statistical aggregations such as `List.Average` and `List.StandardDeviation` can also be affected.
+
+**How to spot it:** The actual and expected values are very close but differ in the last one or two decimal digits. This is common for tests under the `Math/` and `GroupBy/` folders.
+
+**Examples:** `ValueFunctions_DivideDecimalPrecision`, `FoldListStandardDeviation`, `GroupByWithListAverage`
+
+#### 3. DateTime Arithmetic and Duration Operations
+
+Some datetime operations involve M-specific behavior that not all backends support natively:
+
+- **Datetime subtraction**: Subtracting one datetime from another produces an M `#duration` value. Some backends represent the difference as an interval or numeric value that does not map cleanly back to `#duration`.
+- **Adding complex durations**: Adding a multi-component `#duration` (for example, 1 day, 1 hour, 1 minute, and 1.25 seconds) to a datetime requires the backend to handle each component. Some backends truncate fractional seconds or do not support adding compound intervals in a single operation.
+- **Adding durations to a date**: Adding a `#duration` to a `date` value (not a `datetime`) is M-specific. The M engine absorbs sub-day components and returns a `date`, but some backends promote the result to a `datetime` or handle it differently.
+
+Note that simpler operations should pass on any correctly-folded connector. If `Date.AddDays` on a datetime strips the time component, or if `Time.Hour` / `Time.Minute` / `Time.Second` return incorrect values, those failures likely point to a connector folding bug rather than a backend variation.
+
+**How to spot it:** The test involves datetime subtraction, complex duration addition, or adding a duration to a date-typed column, and the result has a different format or type than expected.
+
+**Examples:** `DateTimeArithmetic`, `DateTimeAddDuration`, `DateAddDuration`
+
+#### 4. Text Edge Cases
+
+Text functions with unusual parameters may behave differently across backends. For example, `Text.Middle` with a negative length expects an empty string in M, but some backends may return an error or a non-empty result.
+
+**How to spot it:** The test uses an edge-case parameter value for a text function and the result differs from the expected baseline.
+
+**Examples:** `TextMiddleWithNegativeLength`
+
+> **Note:** If a test produces unexpected results that do not match any of the categories above, it may indicate a genuine connector bug rather than a backend variation.
