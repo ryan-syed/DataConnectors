@@ -240,6 +240,8 @@ class TestResult {
     TestResult([string]$settingsFile, [string]$testFolder, [string]$testName, [string]$outputStatus, [string]$testStatus, [string]$duration){
         # Constructor to Initialize the Test Result Object
         $this.SettingsFile = $settingsFile;
+        $this.TestFolder = $testFolder;
+        $this.TestName = $testName;
         $this.OutputStatus = $outputStatus;
         $this.TestStatus = $testStatus;
         $this.Duration = $duration;
@@ -310,6 +312,8 @@ foreach ($TestSettings in $TestSettingsList){
                # Handle tests that don't have output (e.g., failed tests)
                $TestResults += [TestResult]::new($TestSettings, $testFolder, $Result.Name.Split("\")[-1], "Failed", $Result.Status, (NEW-TIMESPAN -Start $Result.StartTime  -End $Result.EndTime))
            }
+           $TestCount += 1
+            if($Result.Status -eq "Passed"){
                 $Passed++
             }
             else{
