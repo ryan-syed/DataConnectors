@@ -4,8 +4,7 @@
        Runs the pre-built PQ/PQOut format tests in Power Query SDK Test Framework using pqtest.exe compare command.
 
        .DESCRIPTION
-       This script will execute the PQ SDK PQ/PQOut tests present under Sanity, Standard & DataSourceSpecific folders.
-       RunPQSDKTestSuitesSettings.json file is used provide configurations need to this script. Please review the template RunPQSDKTestSuitesSettingsTemplate.json for more info.
+       RunPQSDKTestSuitesSettings.json file is used to provide configurations needed for this script. Please review the template RunPQSDKTestSuitesSettingsTemplate.json for more info.
        Pre-Requisite: Ensure the credentials are setup for your connector following the instructions here: https://learn.microsoft.com/power-query/power-query-sdk-vs-code#set-credential
 
        .LINK
@@ -258,7 +257,7 @@ $TestResults = @()
 $RawTestResults = @()
 $TestResultsObjects = @()
 
-# Run the compare command for each of the TestSetttings Files
+# Run the compare command for each of the TestSettings Files
 foreach ($TestSettings in $TestSettingsList){
 
     Write-Output("`r`nRunning the TestSuite for the TestSettings: " + $TestSettingsDirectoryPath + "\" + $TestSettings)

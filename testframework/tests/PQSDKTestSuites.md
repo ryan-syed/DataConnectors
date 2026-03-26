@@ -192,7 +192,7 @@ Example:
 ## Creating custom tests
 
 Below are sample instructions on how custom tests can be added:
-- Create a `Custom` folder under `testframework\tests\TesSuites`.
+- Create a `Custom` folder under `testframework\tests\TestSuites`.
 - Create a PQ file with the M Query that needs to be tested and place it in the `Custom` directory.
 - Create a settings file `CustomSettings.json` under `testframework\tests\ConnectorConfigs\<Connector Name>\Settings` folder. Add the paths for test folder `"QueryFilePath": "TestSuites/Custom"` and the parameter query file `"ParameterQueryFilePath": "ParameterQueries/<Connector Name>/<Connector Name>.parameterquery.pq"` in it.
 - Run the test first time to generate the PQOut output file.
