@@ -64,7 +64,7 @@ param(
 # Ensure the credentials are setup for your connector following the instructions here: https://learn.microsoft.com/power-query/power-query-sdk-vs-code#set-credential
 
 # Retrieving the settings for running the TestSuites from the JSON settings file
-$RunPQSDKTestSuitesSettings = Get-Content -Path RunPQSDKTestSuitesSettings.json | ConvertFrom-Json
+$RunPQSDKTestSuitesSettings = Get-Content -Path (Join-Path $PSScriptRoot "RunPQSDKTestSuitesSettings.json") | ConvertFrom-Json
 
 # Setting the PQTestExePath from settings object if not passed as an argument
 if (!$PQTestExePath){ $PQTestExePath = $RunPQSDKTestSuitesSettings.PQTestExePath }
@@ -356,6 +356,7 @@ $TestResults  | Format-Table -AutoSize -Property SettingsFile, TestFolder, TestN
             { $_ -eq "Output File Generated" } { $color = "$($PSStyle.Foreground.Green)"  }
             { $_ -eq "Failed" } { $color = "$($PSStyle.Foreground.Red)"    }
             { $_ -eq "Error"  } { $color = "$($PSStyle.Foreground.Yellow)" }
+            default { $color = "" }
     }
     "$color$($_.OutputStatus)$($PSStyle.Reset)"
 }
