@@ -2,7 +2,8 @@
 -- two decimal places. Map 'double' to the appropriate floating-point or decimal
 -- type in your data source (e.g., FLOAT, DOUBLE, REAL, DECIMAL(10,2), NUMBER).
 -- Similarly, map 'int' to INTEGER/INT, 'boolean' to BOOLEAN/BIT, 'timestamp' to
--- DATETIME/TIMESTAMP, 'date' to DATE, and 'string' to VARCHAR/NVARCHAR/TEXT as
+-- DATETIME/TIMESTAMP, 'date' to DATE, 'string' to VARCHAR/NVARCHAR/TEXT, and
+-- 'decimal(p,s)' to DECIMAL/NUMBER with the specified precision and scale as
 -- supported by your data source.
 
 CREATE TABLE NycTaxiData(
@@ -40,4 +41,13 @@ CREATE TABLE TaxiZoneLookup (
 	Borough string,
 	Zone string,
 	service_zone string
+);
+
+CREATE TABLE misc_table (
+	DATETIMEFIELD timestamp,
+	BOOLEANFIELD boolean,
+	BIGNUMERICFIELD decimal(38,18),
+	NUMERICFIELD decimal(12,6),
+	INTEGERFIELD int,
+	STRINGFIELD string
 );

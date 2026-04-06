@@ -15,7 +15,9 @@ The PQ SDK Test Framework dataset contains the below files:
 - **nyc_taxi_trip_date_data.csv** file with 10000 rows containing record identifier and two date columns processed from
   the February 2023 green trip data
 - **taxi+\_zone_lookup.csv** file which contains 265 rows from the taxi zone lookup table
-- **PQSDKTestFrameworkDataSchema.sql** file contains the schema for NyxTaxiGreen and TaxiZoneLookup table
+- **misc_table.csv** file with 1 row containing mixed data types (timestamp, boolean, decimal, integer, string) used
+  for datatype conversion tests
+- **PQSDKTestFrameworkDataSchema.sql** file contains the schema for NycTaxiData, NycTaxiDateData, TaxiZoneLookup and MiscTable tables
 
 ## PQ SDK Test Framework - Data Types and Precision
 
@@ -30,6 +32,7 @@ The schema in **PQSDKTestFrameworkDataSchema.sql** uses generic type names (`int
 | `timestamp` | Date and time | DATETIME, TIMESTAMP, TIMESTAMP_NTZ |
 | `date` | Date only | DATE |
 | `string` | Variable-length text | VARCHAR, NVARCHAR, TEXT |
+| `decimal(p,s)` | Fixed-precision numeric with precision `p` and scale `s` | DECIMAL(p,s), NUMBER(p,s), NUMERIC(p,s) |
 
 > **Note:** All `double` columns in the **NycTaxiData** table (e.g., `trip_distance`, `fare_amount`, `total_amount`)
 > contain values with at most two decimal places. When choosing a data source type, either a floating-point type
@@ -41,4 +44,5 @@ The PQ SDK Test Framework dataset needs to be loaded to the datasource for your 
 PQ SDK Testframework Test Suites. The data is provided in convenient csv format so that it can be easily be loaded to
 any datasource. The **nyc_taxi_tripdata.csv**, **nyc_taxi_trip_date_data.csv** and **taxi+\_zone_lookup.csv** files
 should be respectively loaded into **NycTaxiData**, **NycTaxiDateData** and **TaxiZoneLookup** tables as per the schema
-specified in the **PQSDKTestFrameworkDataSchema.sql** file.
+specified in the **PQSDKTestFrameworkDataSchema.sql** file. The **misc_table.csv** file should be loaded into the
+**misc_table** table using the same schema file.
